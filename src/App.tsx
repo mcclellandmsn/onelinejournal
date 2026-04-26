@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "./auth/AuthProvider";
 import {
   addDays,
   displayLongDate,
@@ -15,6 +16,7 @@ import {
 } from "./storage";
 
 export function App() {
+  const { user, signOut } = useAuth();
   const [todayKey, setTodayKey] = useState(() => formatDateKey(new Date()));
   const [selectedKey, setSelectedKey] = useState(() => formatDateKey(new Date()));
   const [draft, setDraft] = useState(() => getEntry(formatDateKey(new Date())));
@@ -76,12 +78,24 @@ export function App() {
     <div className="min-h-screen bg-paper">
       <header className="border-b border-paper-dark/60 bg-paper/90 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-2xl px-4 py-5">
-          <h1 className="font-serif text-2xl font-semibold text-ink tracking-tight">
-            One line a day
-          </h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            A single sentence for each day—yours to keep in the browser.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="font-serif text-2xl font-semibold text-ink tracking-tight">
+                One line a day
+              </h1>
+              <p className="mt-1 text-sm text-ink-muted">
+                A single sentence for each day—signed in as{" "}
+                <span className="text-ink font-medium">{user?.email ?? "you"}</span>.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="shrink-0 rounded-lg border border-paper-dark bg-white px-3 py-2 text-sm font-medium text-ink shadow-sm hover:bg-paper-dark/30"
+            >
+              Sign out
+            </button>
+          </div>
           <label className="mt-4 block">
             <span className="sr-only">Search entries</span>
             <input
