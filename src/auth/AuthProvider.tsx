@@ -59,8 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearAuthError = useCallback(() => setAuthError(null), []);
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
-    if (!supabase) return;
     setAuthError(null);
+    if (!supabase) return "Supabase is not configured.";
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setAuthError(error.message);
@@ -70,8 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUpWithPassword = useCallback(async (email: string, password: string) => {
-    if (!supabase) return;
     setAuthError(null);
+    if (!supabase) return "Supabase is not configured.";
     const emailRedirectTo =
       typeof window !== "undefined" ? `${window.location.origin}/` : undefined;
     const { error } = await supabase.auth.signUp({
@@ -87,8 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (!supabase) return;
     setAuthError(null);
+    if (!supabase) return "Supabase is not configured.";
     const { error } = await supabase.auth.signOut();
     if (error) {
       setAuthError(error.message);
