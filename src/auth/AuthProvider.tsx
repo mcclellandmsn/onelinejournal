@@ -17,9 +17,9 @@ type AuthContextValue = {
   user: User | null;
   authError: string | null;
   clearAuthError: () => void;
-  signInWithPassword: (email: string, password: string) => Promise<void>;
-  signUpWithPassword: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<string | null>;
+  signUpWithPassword: (email: string, password: string) => Promise<string | null>;
+  signOut: () => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -62,21 +62,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return;
     setAuthError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setAuthError(error.message);
+    if (error) {
+      setAuthError(error.message);
+      return error.message;
+    }
+    return null;
   }, []);
 
   const signUpWithPassword = useCallback(async (email: string, password: string) => {
     if (!supabase) return;
     setAuthError(null);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) setAuthError(error.message);
+    const emailRedirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/` : undefined;
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: emailRedirectTo ? { emailRedirectTo } : undefined,
+    });
+    if (error) {
+      setAuthError(error.message);
+      return error.message;
+    }
+    return null;
   }, []);
 
   const signOut = useCallback(async () => {
     if (!supabase) return;
     setAuthError(null);
     const { error } = await supabase.auth.signOut();
-    if (error) setAuthError(error.message);
+    if (error) {
+      setAuthError(error.message);
+      return error.message;
+    }
+    return null;
   }, []);
 
   const value = useMemo<AuthContextValue>(

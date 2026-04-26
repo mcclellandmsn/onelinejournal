@@ -45,9 +45,13 @@ describe("AuthScreen", () => {
     await user.click(screen.getByRole("tab", { name: "Show sign-up form" }));
     await user.type(screen.getByLabelText("Email"), "new@example.com");
     await user.type(screen.getByLabelText("Password"), "newpass1");
+    await user.type(screen.getByLabelText("Confirm password"), "newpass1");
     await user.click(screen.getByRole("button", { name: "Submit registration" }));
 
     expect(signUpWithPassword).toHaveBeenCalledWith("new@example.com", "newpass1");
     expect(signInWithPassword).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(/check your email to verify/i),
+    ).toBeInTheDocument();
   });
 });

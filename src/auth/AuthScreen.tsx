@@ -6,17 +6,33 @@ export function AuthScreen() {
   const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     clearAuthError();
+    setLocalError(null);
+    setNotice(null);
+
+    if (mode === "signUp") {
+      if (password !== confirmPassword) {
+        setLocalError("Passwords do not match.");
+        return;
+      }
+    }
+
     setPending(true);
     try {
       if (mode === "signIn") {
         await signInWithPassword(email, password);
       } else {
-        await signUpWithPassword(email, password);
+        const err = await signUpWithPassword(email, password);
+        if (!err) {
+          setNotice("Account created. Check your email to verify your address, then come back and sign in.");
+        }
       }
     } finally {
       setPending(false);
@@ -46,6 +62,8 @@ export function AuthScreen() {
             onClick={() => {
               setMode("signIn");
               clearAuthError();
+              setLocalError(null);
+              setNotice(null);
             }}
             className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
               mode === "signIn"
@@ -63,6 +81,8 @@ export function AuthScreen() {
             onClick={() => {
               setMode("signUp");
               clearAuthError();
+              setLocalError(null);
+              setNotice(null);
             }}
             className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
               mode === "signUp"
@@ -98,6 +118,33 @@ export function AuthScreen() {
               className="mt-1 w-full rounded-lg border border-paper-dark bg-white px-3 py-2.5 text-ink shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
             />
           </label>
+
+          {mode === "signUp" ? (
+            <label className="block">
+              <span className="text-sm font-medium text-ink-muted">Confirm password</span>
+              <input
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-paper-dark bg-white px-3 py-2.5 text-ink shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+              />
+            </label>
+          ) : null}
+
+          {notice ? (
+            <p className="text-sm text-ink bg-paper-dark/25 border border-paper-dark rounded-lg px-3 py-2">
+              {notice}
+            </p>
+          ) : null}
+
+          {localError ? (
+            <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {localError}
+            </p>
+          ) : null}
 
           {authError ? (
             <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
